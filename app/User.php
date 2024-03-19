@@ -2,13 +2,20 @@
 
 namespace App;
 
+use App\Models\Role;
+use Laravel\Sanctum\HasApiTokens;
+use Laratrust\Contracts\LaratrustUser;
+use Illuminate\Notifications\Notifiable;
+use Laratrust\Traits\HasRolesAndPermissions;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements LaratrustUser
 {
+    use HasApiTokens;
     use Notifiable;
+    use HasRolesAndPermissions;
+
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +23,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'last_name', 'email', 'password', 'identity_number'
+        'name', 'phone', 'email', 'password', 'identity_number', 'is_active'
     ];
 
     /**
@@ -44,5 +51,10 @@ class User extends Authenticatable
         }
 
         return "{$this->name} {$this->last_name}";
+    }
+
+    public function role()
+    {
+        $this->belongsTo(Role::class);
     }
 }

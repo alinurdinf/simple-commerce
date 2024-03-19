@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use App\Models\UserRoleView;
 use App\User;
 use Illuminate\Http\Request;
 
@@ -28,9 +30,12 @@ class HomeController extends Controller
 
         $widget = [
             'users' => $users,
-            //...
+            'active_users' => User::where('is_active', true)->count(),
+            'products' => Product::count(),
+            'active_products' => Product::where('status', 'available')->count(),
         ];
 
-        return view('home', compact('widget'));
+        $products = Product::orderby('id', 'desc')->with('galleries')->limit(5)->get();
+        return view('home', compact('widget', 'products'));
     }
 }

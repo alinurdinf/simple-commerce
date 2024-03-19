@@ -21,7 +21,7 @@ class User extends Authenticatable implements LaratrustUser
      * @var array
      */
     protected $fillable = [
-        'name', 'last_name', 'email', 'password', 'identity_number'
+        'name', 'phone', 'email', 'password', 'identity_number', 'is_active'
     ];
 
     /**
@@ -49,5 +49,9 @@ class User extends Authenticatable implements LaratrustUser
         }
 
         return "{$this->name} {$this->last_name}";
+    }
+    public function role()
+    {
+        $this->belongsTo(Role::class);
     }
 }

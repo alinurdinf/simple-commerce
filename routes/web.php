@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\BasicController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductGalleryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,9 +17,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'HomePageController@index')->name('welcome');
+
 
 Route::get('/home', 'HomeController@index')->name('home');
 
@@ -32,9 +35,12 @@ Route::get('/blank', function () {
 
 Route::middleware('auth')->group(function () {
     Route::resource('basic', BasicController::class);
-    Route::group(['middleware' => 'auth', 'prefix' => 'masterdata'], function () {
-        Route::resource('lecture', LectureController::class);
-        Route::resource('student', StudentController::class);
-    });
+
+    Route::resource('users', UserController::class)->only(['index', 'show', 'edit', 'update', 'destroy', 'store']);
+    Route::resource('products', ProductController::class)->only(['index', 'show', 'edit', 'update', 'destroy', 'store']);
+
+    Route::get('product-galleries/{id}', [ProductGalleryController::class, 'index'])->name('product-galleries.index');
+    Route::resource('product-galleries', ProductGalleryController::class)->only(['show', 'edit', 'update', 'destroy', 'store']);
+
     Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index'])->name('logs');
 });

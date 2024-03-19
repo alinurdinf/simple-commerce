@@ -3,9 +3,11 @@
 namespace App\Actions\Fortify;
 
 use App\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
@@ -22,7 +24,7 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:255', Rule::unique(User::class)],
             'email' => [
                 'required',
                 'string',
@@ -30,14 +32,23 @@ class CreateNewUser implements CreatesNewUsers
                 'max:255',
                 Rule::unique(User::class),
             ],
-            'password' => $this->passwordRules(),
         ])->validate();
 
+        $password = Str::random(12);
+
+        $maildata = [
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'password' => $password,
+        ];
+
+        Mail::to($input['email'])->send(new \App\Mail\UserRegisterNotification($maildata));
         return User::create([
             'name' => $input['name'],
-            'last_name' => $input['last_name'],
+            'phone' => $input['phone'],
             'email' => $input['email'],
-            'password' => Hash::make($input['password']),
+            'password' => Hash::make($password),
+            'is_active' => false,
         ]);
     }
 }
